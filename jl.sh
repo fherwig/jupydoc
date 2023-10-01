@@ -1,6 +1,7 @@
 #!/opt/homebrew/bin/bash
 # using homebrew bash instead of the default one
 # to get the associative array feature
+echo "Starting Jupyter Lab in Docker..."
 
 # Define the name based on the current directory
 cwdir=${PWD##*/}
@@ -25,7 +26,7 @@ start_new_container() {
     port=$((port + 1))
   done
   
-  local container_id=$(docker run --hostname $name -d -p $port:8888 -v "$(pwd)":/home/fherwig/work -w /home/fherwig/work --name $name jupydoc:latest)
+  local container_id=$(docker run --hostname $name -d -p $port:8888 -v "$(pwd)":/home/fherwig/work -v "$HOME":/home/fherwig/home -w /home/fherwig/work --name $name jupydoc:latest)
   echo Waiting 5s for Jupyter Lab to initialize...
   sleep 5
   local token=$(docker logs $container_id 2>&1 | awk -F= '/token/ {print $2; exit}')
@@ -48,27 +49,30 @@ else
   declare -A container_map
   while IFS= read -r line; do
     port=$(docker port $line 8888 | awk -F: '{print $2}')
-    echo "$i: $line (Port: $port)"
+    echo "$i: Log in ($i) | Open in Chrome ($i$i) | Remove ($i$i$i) - $line (Port: $port)"
     container_map[$i]="$line:$port"
     i=$((i + 1))
   done <<< "$existing_containers"
   
   # Prompt user for action
-  read -p "Choose a container to log into [0-$((i-1))], 'new' to start a new container, or 'open' to open in browser [new]: " choice
+  read -p "Choose an action, 'new' to start a new container, or 'killall' to remove all [new]: " choice
   choice=${choice:-new}
-
   if [ "$choice" = "new" ]; then
     start_new_container
-  elif [ "$choice" = "open" ]; then
-    read -p "Choose a container to open in browser [0-$((i-1))]: " open_choice
-    container_info=${container_map[$open_choice]}
+  elif [ "$choice" = "killall" ]; then
+    docker rm -f $(docker ps -a -q -f name='^jd_')
+  elif [[ "$choice" =~ ^[0-9]$ ]]; then
+    container_info=${container_map[${choice:0:1}]}
+    docker exec -it -u fherwig "${container_info%%:*}" /bin/bash
+  elif [[ "$choice" =~ ^[0-9]{2}$ ]]; then
+    container_info=${container_map[${choice:0:1}]}
     port=${container_info##*:}
     open -a "Google Chrome" "http://localhost:$port"
-  elif [[ "$choice" =~ ^[0-9]+$ ]] && [ -n "${container_map[$choice]}" ]; then
-    container_info=${container_map[$choice]}
-    container_name=${container_info%%:*}
-    docker exec -it -u fherwig "$container_name" /bin/bash
+  elif [[ "$choice" =~ ^[0-9]{3}$ ]]; then
+    container_info=${container_map[${choice:0:1}]}
+    docker rm -f "${container_info%%:*}"
   else
     echo "Invalid choice. Exiting."
   fi
+
 fi
