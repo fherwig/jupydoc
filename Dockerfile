@@ -49,9 +49,10 @@ RUN chmod +x /tmp/start.sh
 # Create a user with the specific username
 RUN useradd -m -s /bin/bash fherwig
 
-# Copy the customized .bashrc and .profile into the image
+# Copy the customized .bashrc and .profile into the image 1
 COPY dot.bash_aliases /home/fherwig/.bash_aliases 
 RUN chown -R fherwig:fherwig /home/fherwig/.bash_aliases
+
 
 # Set the startup script as the entry point
 ENTRYPOINT ["/tmp/start.sh"]
