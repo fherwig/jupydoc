@@ -1,7 +1,7 @@
 # Jupydoc
 
 ## What it is for
-Jupydoc is a basic collection of tools to build a minimal Jupyter server meant to run on your local laptop. Along with it comes a script `jl.sh` which manages the starting and administration of akctive kernels. `jl.sh` would be started from the command line in a given directory and the current directory as well as a link to the `$HOME` directory will appear in the jupyter server. The script also allows command line login to the server machine. 
+Jupydoc is a basic collection of tools to build and run a minimal Jupyter server in a Docker container meant to run on your local computer or laptop. Along with it comes a script `jl.sh` which manages the starting and administration of akctive kernels. `jl.sh` would be started from the command line in a given directory and the current directory as well as a link to the `$HOME` directory will appear in the jupyter server. The script also allows command line login to the server machine. 
 
 ## HowTo
 1. It is assumed that you have a working Docker installation on your computer. Check with the usual `docker run hello-world` command.
