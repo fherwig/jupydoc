@@ -7,6 +7,34 @@ echo "Starting Jupyter Lab in Docker..."
 cwdir=${PWD##*/}
 name="jd_${cwdir}"
 
+# default tag
+tag="latest"
+
+# add command line options
+## --help provides a help message
+## --tag allows to specify a tag to be used for the docker image
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --help)
+      echo "Usage: jl.sh [--tag <tag>]"
+      echo "Here are the available tag options:"
+      docker images | grep jupydoc | awk '{print $2}' | paste -sd ',' -
+      exit 0
+      ;;
+    --tag)
+      shift
+      tag=$1
+      ;;
+    *)
+      echo "Invalid argument: $1"
+      exit 1
+      ;;
+  esac
+  shift
+done
+
+echo "Using tag: " $tag
+
 # Check Bash version
 min_version=4
 if [ ${BASH_VERSINFO[0]} -lt $min_version ]; then
@@ -17,8 +45,11 @@ fi
 # Function to start a new container
 # Function to start a new container
 start_new_container() {
+  local tag=${1:-latest}
+  # Rest of the function code...
+
   local cwdir=${PWD##*/}
-  local name="jd_${cwdir}"
+  local name="jd_${cwdir}.${tag}"
   
   # Find an unused port starting from 8888
   local port=8888
@@ -26,21 +57,22 @@ start_new_container() {
     port=$((port + 1))
   done
   
-  local container_id=$(docker run --hostname $name -d -p $port:8888 -v "$(pwd)":/home/fherwig/work -v "$HOME":/home/fherwig/home -w /home/fherwig/work --name $name jupydoc:latest)
+  local container_id=$(docker run --hostname $name -d -p 5901:5901 -p $port:8888 -v "$(pwd)":/home/fherwig/work -v "$HOME":/home/fherwig/home -w /home/fherwig/work --name $name jupydoc:$tag)
   echo Waiting 5s for Jupyter Lab to initialize...
   sleep 5
   local token=$(docker logs $container_id 2>&1 | awk -F= '/token/ {print $2; exit}')
   
   open -a "Google Chrome"  "http://localhost:$port/?token=${token}"
+  echo "Container $name started with token $token"
+  echo "URL to jupyterlab server: http://localhost:$port/?token=${token}"
 }
-
 
 # Check if any containers match the "jd_" pattern
 existing_containers=$(docker ps -a --format '{{.Names}}' | grep '^jd_')
 
 if [ -z "$existing_containers" ]; then
     # If no existing containers, create and run one
-    start_new_container
+    start_new_container  $tag
 else
   echo "Existing containers:"
   
@@ -58,7 +90,7 @@ else
   read -p "Choose an action, 'new' to start a new container, or 'killall' to remove all [new]: " choice
   choice=${choice:-new}
   if [ "$choice" = "new" ]; then
-    start_new_container
+    start_new_container $tag
   elif [ "$choice" = "killall" ]; then
     docker rm -f $(docker ps -a -q -f name='^jd_')
   elif [[ "$choice" =~ ^[0-9]$ ]]; then

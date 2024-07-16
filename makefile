@@ -6,7 +6,7 @@ IMAGE_NAME = jupydoc
 # Local build
 build:
 	@echo "Building Docker image for local development..."
-	docker build -t $(IMAGE_NAME):latest .
+	docker build -t $(IMAGE_NAME):local .
 
 # No cache build
 no-cache:

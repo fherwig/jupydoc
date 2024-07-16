@@ -1,0 +1,9 @@
+{
+    "shortcuts": [
+        {
+            "command": "application:reload",
+            "keys": ["Ctrl R"],
+            "selector": "body"
+        }
+    ]
+}

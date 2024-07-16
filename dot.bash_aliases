@@ -16,3 +16,12 @@ cd ~/work
 if [ ! -e /home/fherwig/work/home ]; then
     ln -s /home/fherwig/home /home/fherwig/work/home
 fi
+
+# define function to launch vncserver
+jl_vncserver() {
+    echo Launching vncserver. You can connect to it using:
+    echo screen sharing app or Cmd-K in Finder and vnc://localhost:5901
+    echo The passwd is csa2024
+    vncserver :1 -geometry 1920x1280 -depth 24 
+}
+echo "Type 'jl_vncserver' to launch vncserver"
