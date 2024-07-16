@@ -1,6 +1,10 @@
 #!/opt/homebrew/bin/bash
 # using homebrew bash instead of the default one
 # to get the associative array feature
+# it may be in a different location on your computer
+# atlas:      #!/usr/local/bin/bash                                            
+# kitkatla:   #!/opt/homebrew/bin/bash
+
 echo "Starting Jupyter Lab in Docker..."
 
 # Define the name based on the current directory

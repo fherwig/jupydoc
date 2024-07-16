@@ -1,7 +1,10 @@
-# Some options for the base image:
-#FROM debian:bullseye-slim
-FROM arm64v8/ubuntu:20.04
-# FROM arm64v8/ubuntu:22.04
+# Start with the base image for your hardware
+# Apple silicon or Intel
+# (as of now this has only been tested on Macs, both
+# flavours)
+
+#FROM arm64v8/ubuntu:20.04
+FROM ubuntu:20.04
 
 # Set environment variables to non-interactive (this prevents some prompts)
 ENV DEBIAN_FRONTEND=non-interactive
