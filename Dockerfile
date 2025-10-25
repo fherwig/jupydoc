@@ -1,6 +1,6 @@
 # Some options for the base image:
-#FROM debian:bullseye-slim
-FROM arm64v8/ubuntu:20.04
+FROM debian:bullseye-slim
+# FROM arm64v8/ubuntu:20.04
 # FROM arm64v8/ubuntu:22.04
 
 # Set environment variables to non-interactive (this prevents some prompts)
@@ -15,11 +15,7 @@ RUN apt-get update && \
     xargs apt-get install -y --no-install-recommends < /tmp/apt-get-packages.txt && \
     rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && apt-get install -y software-properties-common
-RUN add-apt-repository -y ppa:mozillateam/ppa
-RUN apt-get update && apt-get install -y firefox-esr
-
-RUN apt-get install -y python3.10 pip 
+RUN apt-get update && apt-get install -y firefox-esr python3 python3-pip 
 
 # Install Python data science packages listed in pip-packages.txt
 RUN pip install --no-cache-dir -r /tmp/pip-packages.txt
@@ -53,8 +49,17 @@ RUN mkdir -p /home/fherwig/.vnc && \
     chmod 600 /home/fherwig/.vnc/passwd && \
     chown -R fherwig:fherwig /home/fherwig/.vnc
 
+# Configure PulseAudio for network audio
+RUN mkdir -p /home/fherwig/.config/pulse && \
+    echo "default-server = tcp:host.docker.internal:4713" > /home/fherwig/.config/pulse/client.conf && \
+    echo "autospawn = no" >> /home/fherwig/.config/pulse/client.conf && \
+    chown -R fherwig:fherwig /home/fherwig/.config
+
+# Set PulseAudio environment variables for better quality
+ENV PULSE_LATENCY_MSEC=60
+
 # Set the startup script as the entry point
 ENTRYPOINT ["/tmp/start.sh"]
 
-# Expose port 8888 to access Jupyter Lab
-EXPOSE 8888
+# Expose ports for Jupyter Lab and VNC
+EXPOSE 8888 5901

@@ -20,6 +20,9 @@ xfonts-75dpi
 xfonts-scalable
 fontconfig
 sudo
+pulseaudio
+pulseaudio-utils
+pavucontrol
 
 build-essential 
 libffi-dev 

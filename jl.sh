@@ -50,14 +50,27 @@ start_new_container() {
 
   local cwdir=${PWD##*/}
   local name="jd_${cwdir}.${tag}"
-  
+
+  # Start PulseAudio on host if not already running (for VNC audio support)
+  if command -v pulseaudio >/dev/null 2>&1; then
+    if ! pgrep -x pulseaudio >/dev/null 2>&1; then
+      echo "Starting PulseAudio for audio support in VNC..."
+      # Use IP ACL to allow connections from localhost and Docker networks
+      pulseaudio --load="module-native-protocol-tcp auth-ip-acl=127.0.0.1;172.16.0.0/12;192.168.0.0/16;fe80::/10;fdc4::/64" --exit-idle-time=-1 --daemon 2>/dev/null
+    fi
+  else
+    echo "Note: PulseAudio not installed. Audio in VNC will not work."
+    echo "Install with: brew install pulseaudio"
+  fi
+
   # Find an unused port starting from 8888
   local port=8888
   while lsof -Pi :$port -sTCP:LISTEN -t >/dev/null ; do
     port=$((port + 1))
   done
-  
-  local container_id=$(docker run --hostname $name -d -p 5901:5901 -p $port:8888 -v "$(pwd)":/home/fherwig/work -v "$HOME":/home/fherwig/home -w /home/fherwig/work --name $name jupydoc:$tag)
+
+  # Add --add-host for PulseAudio network access to host (no need to expose 4713 - container connects to host's 4713)
+  local container_id=$(docker run --hostname $name -d -p 5901:5901 -p $port:8888 --add-host=host.docker.internal:host-gateway -v "$(pwd)":/home/fherwig/work -v "$HOME":/home/fherwig/home -w /home/fherwig/work --name $name jupydoc:$tag)
   echo Waiting 5s for Jupyter Lab to initialize...
   sleep 5
   local token=$(docker logs $container_id 2>&1 | awk -F= '/token/ {print $2; exit}')

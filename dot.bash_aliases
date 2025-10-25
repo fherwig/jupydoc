@@ -19,9 +19,15 @@ fi
 
 # define function to launch vncserver
 jl_vncserver() {
-    echo Launching vncserver. You can connect to it using:
+    echo Launching vncserver with audio support...
+    echo You can connect to it using:
     echo screen sharing app or Cmd-K in Finder and vnc://localhost:5901
     echo The passwd is csa2024
-    vncserver :1 -geometry 1920x1280 -depth 24 
+
+    vncserver :1 -geometry 1920x1280 -depth 24
+
+    echo ""
+    echo "VNC server started. Audio is configured to use host PulseAudio."
+    echo "If audio doesn't work, ensure PulseAudio is running on host with network protocol enabled."
 }
 echo "Type 'jl_vncserver' to launch vncserver"
